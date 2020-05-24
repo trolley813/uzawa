@@ -1,5 +1,9 @@
 #include <iostream>
 
+using namespace std;
+
+void uzawa();
+
 int main(int, char**) {
-    std::cout << "Hello, world!\n";
+    uzawa();
 }
