@@ -2,9 +2,9 @@
 
 using namespace std;
 
-void uzawa();
+void uzawa_mpi();
 
 int main(int, char**) {
-    printf("OpenMP Uzawa execution");
-    uzawa();
+    printf("MPI Uzawa execution");
+    uzawa_mpi();
 }

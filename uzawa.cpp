@@ -18,14 +18,6 @@ const double epsilon = 1e-4;
 
 inline int idx(int i, int j) { return i * n + j; }
 
-// ||a-b||^2
-double diff(const vector<double> &a, const vector<double> &b) {
-  double r = 0;
-  for (int i = 0; i < a.size(); i++)
-    r += (a[i] - b[i]) * (a[i] - b[i]);
-  return r;
-}
-
 void uzawa() {
   vector<double> lambda(n), oldlambda(n);
   int k = 0;
