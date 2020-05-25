@@ -1,9 +1,8 @@
 #include "function.h"
 #include "gauss.h"
-#include <cstdio>
 #include <boost/mpi.hpp>
 #include <boost/serialization/vector.hpp>
-
+#include <cstdio>
 
 namespace mpi = boost::mpi;
 
@@ -11,7 +10,7 @@ namespace mpi = boost::mpi;
 constexpr double a = 10, b = 20, c = 10;
 
 // grid point count (n by n)
-constexpr int n = 11;
+constexpr int n = 31;
 
 // step size (x and y in both domains)
 constexpr double hx1 = a / (n - 1), hx2 = a / (n - 1), hy1 = c / (n - 1),
@@ -98,14 +97,17 @@ void uzawa_mpi() {
         lambda[i] += alpha * (u1[idx(n - 1, i)] - u2[idx(0, i)]);
       d = diff(lambda, oldlambda);
       printf("diff = %lg\n", d);
-    }
-    while (d > epsilon);
+      world.send(1, 1, d <= epsilon);
+    } while (d > epsilon);
   } else if (world_rank == 1) {
-    printf("Receiving from proc. 1\n");
-    world.recv(0, 0, g2);
-    u2 = gauss(g2);
-    printf("Sending to proc. 1\n");
-    world.send(0, 0, u2);
+    bool should_quit = 0;
+    while (!should_quit) {
+      printf("Receiving from proc. 1\n");
+      world.recv(0, 0, g2);
+      u2 = gauss(g2);
+      printf("Sending to proc. 1\n");
+      world.send(0, 0, u2);
+      world.recv(0, 1, should_quit);
+    }
   }
-  
 }

@@ -6,7 +6,7 @@
 constexpr double a = 10, b = 20, c = 10;
 
 // grid point count (n by n)
-constexpr int n = 21;
+constexpr int n = 31;
 
 // step size (x and y in both domains)
 constexpr double hx1 = a / (n - 1), hx2 = a / (n - 1), hy1 = c / (n - 1),

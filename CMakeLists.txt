@@ -6,7 +6,7 @@ enable_testing()
 
 find_package(OpenMP REQUIRED)
 find_package(MPI REQUIRED)
-find_package(Boost REQUIRED COMPONENTS serialization)
+find_package(Boost REQUIRED COMPONENTS mpi serialization)
 
 add_executable(uzawa main.cpp gauss.cpp uzawa.cpp)
 add_executable(uzawa_mpi main_mpi.cpp gauss.cpp uzawa_mpi.cpp)
