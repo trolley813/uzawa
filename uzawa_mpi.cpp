@@ -1,7 +1,11 @@
 #include "function.h"
 #include "gauss.h"
 #include <cstdio>
-#include <mpi.h>
+#include <boost/mpi.hpp>
+#include <boost/serialization/vector.hpp>
+
+
+namespace mpi = boost::mpi;
 
 // 0<=x<=a, 0<=y<=b, split by y=c (1 = lower domain, 2 = upper)
 constexpr double a = 10, b = 20, c = 10;
@@ -20,12 +24,10 @@ const double epsilon = 1e-4;
 inline int idx(int i, int j) { return i * n + j; }
 
 void uzawa_mpi() {
-  MPI_Init(NULL, NULL);
+  mpi::environment env;
+  mpi::communicator world;
 
-  int world_rank;
-  MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
-  int world_size;
-  MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+  int world_rank = world.rank();
 
   vector<double> lambda(n), oldlambda(n);
   int k = 0;
@@ -87,9 +89,9 @@ void uzawa_mpi() {
       }
       u1 = gauss(g1);
       printf("Sending to proc. 2\n");
-      MPI_Send(&g2, n * n * (n * n + 1), MPI_DOUBLE, 1, 0, MPI_COMM_WORLD);
+      world.send(1, 0, g2);
       printf("Receiving from proc. 2\n");
-      MPI_Recv(&u2, n * n, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+      world.recv(1, 0, u2);
       oldlambda = lambda;
       // assign lambdas
       for (int i = 0; i < n; i++)
@@ -100,11 +102,10 @@ void uzawa_mpi() {
     while (d > epsilon);
   } else if (world_rank == 1) {
     printf("Receiving from proc. 1\n");
-    MPI_Recv(&g2, n * n * (n * n + 1), MPI_DOUBLE, 1, 0, MPI_COMM_WORLD,
-             MPI_STATUS_IGNORE);
+    world.recv(0, 0, g2);
     u2 = gauss(g2);
     printf("Sending to proc. 1\n");
-    MPI_Send(&u2, n * n, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD);
+    world.send(0, 0, u2);
   }
-  MPI_Finalize();
+  
 }
